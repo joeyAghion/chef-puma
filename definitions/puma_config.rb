@@ -124,12 +124,24 @@ define :puma_config, owner: nil, group: nil, directory: nil, puma_directory: nil
 
   puma_params = params
   if params[:monit]
-    include_recipe "monit"
-    monitrc puma_params[:name], :action => :enable do
-      template_source 'monitrc.erb'
-      template_cookbook 'puma'
-      variables puma_params
+    service "monit" do
+      supports :status => false, :restart => true, :reload => true
+      action :nothing
     end
+    template "/etc/monit.d/#{puma_params[:name]}.monitrc" do
+      user "root"
+      group "root"
+      source "monitrc.erb"
+      cookbook "puma"
+      variables puma_params
+      notifies :reload, resources(:service => "monit"), :immediately
+    end
+    # include_recipe "monit"
+    # monitrc puma_params[:name], :action => :enable do
+    #   template_source 'monitrc.erb'
+    #   template_cookbook 'puma'
+    #   variables puma_params
+    # end
   elsif params[:upstart]
     template "/etc/init/#{puma_params[:name]}-puma.conf" do
       user "root"

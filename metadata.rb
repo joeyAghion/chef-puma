@@ -8,7 +8,7 @@ version          '0.1.7'
 
 recipe           "puma::default", "Install puma"
 
-depends          'monit'
+# depends          'monit' # incompatible with opsworks
 depends          'logrotate'
 
 %w{ ubuntu debian }.each do |os|
